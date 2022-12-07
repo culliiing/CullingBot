@@ -1,10 +1,6 @@
 ﻿using Discord;
-using Discord.WebSocket;
-using Discord.Interactions;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Diagnostics;
 using Discord.Net;
+using Discord.WebSocket;
 using Newtonsoft.Json;
 
 public class Program
@@ -20,13 +16,13 @@ public class Program
         client.Ready += Client_Ready;
         client.SlashCommandExecuted += SlashCommandHandler;
 
-        string token = File.ReadAllText(Environment.CurrentDirectory + "\\..\\..\\..\\token.txt");
+        var token = File.ReadAllText(Environment.CurrentDirectory + "\\..\\..\\..\\token.txt");
 
-        // I don't know why I can't get env to work.
-        //Console.WriteLine(Environment.GetEnvironmentVariable("DISCORD_TOKEN"));
-        //Console.ReadKey();
+        // I don't know why I can't get env to work:
+        // https://www.google.com/search?q=Environment.GetEnvironmentVariable+returns+null&oq=Environment.GetEnvironmentVariable+returns+null&aqs=chrome..69i57.2736j0j7&sourceid=chrome&ie=UTF-8
+        //Environment.CurrentDirectory = System.Reflection.Assembly.GetEntryAssembly().Location + "\\..\\..\\..\\..\\";
         //var token = Environment.GetEnvironmentVariable("DISCORD_TOKEN");
-        //var guildID = Environment.GetEnvironmentVariable("GUILD_ID");
+        //var guildId = Environment.GetEnvironmentVariable("GUILD_ID");
 
         await client.LoginAsync(TokenType.Bot, token);
         await client.StartAsync();
@@ -43,27 +39,28 @@ public class Program
 
     public async Task Client_Ready()
     {
+
         // Let's build a guild command! We're going to need a guild so lets just put that in a variable.
+        var guildId = File.ReadAllText(Environment.CurrentDirectory + "\\..\\..\\..\\guildID.txt");
         //var guild = client.GetGuild(guildId);
 
         // Next, lets create our slash command builder. This is like the embed builder but for slash commands.
-        //var guildCommand = new SlashCommandBuilder();
-
         // Note: Names have to be all lowercase and match the regular expression ^[\w-]{3,32}$
-        //guildCommand.WithName("first-command");
-
         // Descriptions can have a max length of 100.
-        //guildCommand.WithDescription("This is my first guild slash command!");
+        var guildCommand = new SlashCommandBuilder()
+            .WithName("test")
+            .WithDescription("This is a test command for development purposes.");
 
         // Let's do our global command
-        var globalCommand = new SlashCommandBuilder();
-        globalCommand.WithName("Button");
-        globalCommand.WithDescription("This will generate a pressable button.");
+        var globalCommand = new SlashCommandBuilder()
+            .WithName("globaltest")
+            .WithDescription("This is a global test command for development purposes.");
 
         try
         {
             // Now that we have our builder, we can call the CreateApplicationCommandAsync method to make our slash command.
             //await guild.CreateApplicationCommandAsync(guildCommand.Build());
+            await client.Rest.CreateGuildCommand(guildCommand.Build(), guildId);
 
             // With global commands we don't need the guild.
             await client.CreateGlobalApplicationCommandAsync(globalCommand.Build());
@@ -82,6 +79,6 @@ public class Program
 
     private async Task SlashCommandHandler(SocketSlashCommand command)
     {
-        await command.RespondAsync($"You executed {command.Data.Name}");
+        await command.RespondAsync($"You executed {command.Data.Name}", ephemeral: true);
     }
 }
