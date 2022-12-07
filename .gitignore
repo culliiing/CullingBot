@@ -366,3 +366,4 @@ FodyWeavers.xsd
 /CullingBot/.env
 /CullingBot/tokens.env
 /CullingBot/token.txt
+/CullingBot/guildID.txt
