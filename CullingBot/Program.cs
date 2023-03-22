@@ -59,7 +59,7 @@ public class Program
         client.Ready += async () =>
         {
             Console.WriteLine("Bot ready!");
-            await commands.RegisterCommandsToGuildAsync(UInt64.Parse(config["testGuild"]), true);
+            await commands.RegisterCommandsToGuildAsync(UInt64.Parse(config["guilds:culling"]), true);
         };
 
         await client.LoginAsync(TokenType.Bot, config["tokens:discord"]);
