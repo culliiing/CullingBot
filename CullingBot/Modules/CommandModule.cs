@@ -34,7 +34,7 @@ namespace CullingBot.Modules
                 Placeholder = "Expand me!"
             };
 
-            menu.AddOption("Choose me!", "I can always count on you <3");
+            menu.AddOption("Choose me!", "I can always count on you <3", isDefault: true);
             menu.AddOption("No, me!", "You won't regret it ;)");
 
             var component = new ComponentBuilder();
@@ -42,6 +42,19 @@ namespace CullingBot.Modules
             component.WithSelectMenu(menu);
 
             await RespondAsync("Here are some clicky things for you!", components: component.Build());
+        }
+
+        [SlashCommand("embed", "An embedded message")]
+        public async Task Embed()
+        {
+            var embed = new EmbedBuilder()
+            {
+                Title = "Hello!",
+                Description = "This is an embed.",
+                Color = Color.Green
+            };
+
+            await RespondAsync(embed: embed.Build(), ephemeral: true);
         }
 
         // ComponentInteraction("CustomId")
