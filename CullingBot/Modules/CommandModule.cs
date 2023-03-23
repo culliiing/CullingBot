@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,12 +13,7 @@ namespace CullingBot.Modules
 {
     public class CommandModule : InteractionModuleBase<SocketInteractionContext>
     {
-        [SlashCommand("test", "This is a command built with a command module for testing purposes")]
-        public async Task Test()
-        {
-            await RespondAsync($"You executed the test command!", ephemeral: true);
-        }
-
+        #region Interact
         [SlashCommand("interact", "Clicky things!")]
         public async Task Interact()
         {
@@ -44,20 +40,6 @@ namespace CullingBot.Modules
             await RespondAsync("Here are some clicky things for you!", components: component.Build());
         }
 
-        [SlashCommand("embed", "An embedded message")]
-        public async Task Embed()
-        {
-            var embed = new EmbedBuilder()
-            {
-                Title = "Hello!",
-                Description = "This is an embed.",
-                Color = Color.Green
-            };
-
-            await RespondAsync(embed: embed.Build(), ephemeral: true);
-        }
-
-        // ComponentInteraction("CustomId")
         [ComponentInteraction("clickme")]
         public async Task HandleButtonInput()
         {
@@ -76,13 +58,69 @@ namespace CullingBot.Modules
             string input = modal.Input;
             await RespondAsync(input, ephemeral: true);
         }
+        #endregion
+
+        #region Embed
+        [SlashCommand("embed", "An embedded message")]
+        public async Task Embed()
+        {
+            var embed = new EmbedBuilder()
+            {
+                Title = "Hello!",
+                Description = "This is an embed.",
+                Color = Color.Green
+            };
+
+            await RespondAsync(embed: embed.Build(), ephemeral: true);
+        }
+        #endregion
+
+        [SlashCommand("poll", "Create a poll")]
+        public async Task Poll(string question, string? optionOne = null, string? optionTwo = null, string? optionThree = null, string? optionFour = null, string? optionFive = null, string? optionSix = null, string? optionSeven = null, string? optionEight = null, string? optionNine = null, string? optionTen = null)
+        {
+            var yesButton = new ButtonBuilder()
+            {
+                // Thumbs-up emoji
+                //Emote = new Emoji(@"\uD83D\uDC4D"),
+                Label = "Yes",
+                CustomId = "yes",
+                Style = ButtonStyle.Success
+            };
+
+            var noButton = new ButtonBuilder()
+            {
+                // Thumbs-down emoji
+                //Emote = new Emoji(@"\uD83D\uDC4E"),
+                Label = "No",
+                CustomId = "no",
+                Style = ButtonStyle.Danger
+            };
+
+            var component = new ComponentBuilder();
+            component.WithButton(yesButton);
+            component.WithButton(noButton);
+
+            await RespondAsync(question, components: component.Build());
+        }
+
+        [ComponentInteraction("yes")]
+        public async Task YesButton()
+        {
+            await RespondAsync("Wow. Amazing.", ephemeral: true);
+        }
+
+        [ComponentInteraction("no")]
+        public async Task NoButton()
+        {
+            await RespondAsync("That's a shame.", ephemeral: true);
+        }
     }
 
     public class DemoModal : IModal
     {
         public string Title => "Text Prompt";
         [InputLabel("Write something!")]
-        [ModalTextInput("text_input", TextInputStyle.Short, placeholder: "Be silly!", maxLength: 30)]
+        [ModalTextInput("text_input", TextInputStyle.Short, placeholder: "Be silly!", maxLength: 32)]
 
         public string Input { get; set; }
     }
