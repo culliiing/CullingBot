@@ -12,6 +12,7 @@ using Discord.Commands;
 public class Program
 {
     private DiscordSocketClient client;
+    private bool debug = false;
 
     public static Task Main(string[] args) => new Program().MainAsync();
 
@@ -59,7 +60,10 @@ public class Program
         client.Ready += async () =>
         {
             Console.WriteLine("Bot ready!");
-            await commands.RegisterCommandsToGuildAsync(UInt64.Parse(config["guilds:culling"]), true);
+            if (debug)
+                await commands.RegisterCommandsToGuildAsync(UInt64.Parse(config["guilds:culling"]), true);
+            else
+                await commands.RegisterCommandsGloballyAsync(true);
         };
 
         await client.LoginAsync(TokenType.Bot, config["tokens:discord"]);
