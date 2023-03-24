@@ -30,7 +30,7 @@ namespace CullingBot.Modules
                 Placeholder = "Expand me!"
             };
 
-            menu.AddOption("Choose me!", "I can always count on you <3", isDefault: true);
+            menu.AddOption("Choose me!", "I can always count on you <3");
             menu.AddOption("No, me!", "You won't regret it ;)");
 
             var component = new ComponentBuilder();
@@ -76,23 +76,26 @@ namespace CullingBot.Modules
         #endregion
 
         [SlashCommand("poll", "Create a poll")]
-        public async Task Poll(string question, string? optionOne = null, string? optionTwo = null, string? optionThree = null, string? optionFour = null, string? optionFive = null, string? optionSix = null, string? optionSeven = null, string? optionEight = null, string? optionNine = null, string? optionTen = null)
+        public async Task HandlePoll(string question)
         {
+            var title = question;
+            var poll = Poll.GetNewPoll(title);
+
             var yesButton = new ButtonBuilder()
             {
+                Label = "Yes",
                 // Thumbs-up emoji
                 //Emote = new Emoji(@"\uD83D\uDC4D"),
-                Label = "Yes",
-                CustomId = "yes",
+                CustomId = $"yes:{poll.Id}",
                 Style = ButtonStyle.Success
             };
 
             var noButton = new ButtonBuilder()
             {
+                Label = "No",
                 // Thumbs-down emoji
                 //Emote = new Emoji(@"\uD83D\uDC4E"),
-                Label = "No",
-                CustomId = "no",
+                CustomId = $"no:{poll.Id}",
                 Style = ButtonStyle.Danger
             };
 
@@ -100,19 +103,25 @@ namespace CullingBot.Modules
             component.WithButton(yesButton);
             component.WithButton(noButton);
 
-            await RespondAsync(question, components: component.Build());
+            await RespondAsync(embed: Poll.GetPollEmbed(poll.Id), components: component.Build());
         }
 
-        [ComponentInteraction("yes")]
-        public async Task YesButton()
+        [ComponentInteraction("yes:*")]
+        public async Task YesButton(int pollId)
         {
-            await RespondAsync("Wow. Amazing.", ephemeral: true);
+            await (Context.Interaction as IComponentInteraction).UpdateAsync(x =>
+            {
+                x.Embed = Poll.GetPollEmbed(pollId, true);
+            });
         }
 
-        [ComponentInteraction("no")]
-        public async Task NoButton()
+        [ComponentInteraction("no:*")]
+        public async Task NoButton(int pollId)
         {
-            await RespondAsync("That's a shame.", ephemeral: true);
+            await (Context.Interaction as IComponentInteraction).UpdateAsync(x =>
+            {
+                x.Embed = Poll.GetPollEmbed(pollId, false);
+            });
         }
     }
 
@@ -121,7 +130,7 @@ namespace CullingBot.Modules
         public string Title => "Text Prompt";
         [InputLabel("Write something!")]
         [ModalTextInput("text_input", TextInputStyle.Short, placeholder: "Be silly!", maxLength: 32)]
-
+        
         public string Input { get; set; }
     }
 }
